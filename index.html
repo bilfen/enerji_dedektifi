@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Robi Karanlıkta Kaldı: Onu El Fenerine Ulaştır!</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bilfen: {
+              dark: '#002B66',       // Koyu Bilfen Mavisi
+              primary: '#0B4DB7',    // Ana Mavi
+              accent: '#1E75E8',     // Vurgu Mavisi
+              light: '#EBF4FF',      // Açık Mavi Zemin
+              card: '#FFFFFF',       // Beyaz Kartlar
+              yellow: '#F59E0B',     // Enerji Sarısı
+              green: '#10B981',      // Başarı Yeşili
+              red: '#EF4444'         // Can Kırmızısı
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @keyframes pulse-glow {
+      0%, 100% { filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.7)); }
+      50% { filter: drop-shadow(0 0 22px rgba(251, 191, 36, 1)); }
+    }
+    .animate-glow {
+      animation: pulse-glow 1.5s infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+    .animate-float {
+      animation: float 3s ease-in-out infinite;
+    }
+    .option-btn {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .option-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px -2px rgba(11, 77, 183, 0.18);
+    }
+    /* Touch optimization */
+    button {
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+  </style>
+</head>
+<body class="bg-bilfen-light text-slate-800 font-sans min-h-screen flex flex-col justify-between select-none">
+
+  <header class="bg-bilfen-dark text-white shadow-lg sticky top-0 z-40">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <!-- Robi Logo & Title Mini -->
+      <div class="flex items-center space-x-2">
+        <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center p-1 border border-white/20">
+          <svg viewBox="0 0 100 100" class="w-8 h-8">
+            <rect x="25" y="30" width="50" height="42" rx="12" fill="#E2E8F0" stroke="#002B66" stroke-width="4"/>
+            <circle cx="40" cy="48" r="6" fill="#1E75E8"/>
+            <circle cx="60" cy="48" r="6" fill="#1E75E8"/>
+            <path d="M40 60 Q50 68 60 60" stroke="#002B66" stroke-width="4" fill="none" stroke-linecap="round"/>
+            <rect x="47" y="14" width="6" height="16" fill="#94A3B8"/>
+            <circle cx="50" cy="14" r="7" fill="#F59E0B" class="animate-pulse"/>
+            <rect x="15" y="44" width="10" height="14" rx="3" fill="#94A3B8"/>
+            <rect x="75" y="44" width="10" height="14" rx="3" fill="#94A3B8"/>
+          </svg>
+        </div>
+        <div>
+          <span class="font-extrabold text-base md:text-lg tracking-wide block leading-tight text-white">ROBİ</span>
+          <span class="text-xs text-blue-200 block font-medium">El Feneri Görevi</span>
+        </div>
+      </div>
+
+      <!-- Stats Bar: Hearts, Score, Badges -->
+      <div class="flex items-center gap-3 md:gap-5 bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-2xl border border-white/20 text-sm md:text-base">
+        <!-- Canlar -->
+        <div class="flex items-center space-x-1.5" title="Kalan Can">
+          <span class="text-xs font-bold text-blue-200 hidden sm:inline">CAN:</span>
+          <div id="hearts-container" class="flex space-x-1">
+            <!-- Hearts dynamically generated -->
+          </div>
+        </div>
+
+        <div class="w-px h-5 bg-white/30"></div>
+
+        <!-- Puan -->
+        <div class="flex items-center space-x-1.5" title="Kazanılan Puan">
+          <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+          </svg>
+          <span id="score-display" class="font-extrabold tracking-wider text-yellow-300">0</span>
+          <span class="text-xs text-blue-200 font-semibold">/90</span>
+        </div>
+
+        <div class="w-px h-5 bg-white/30"></div>
+
+        <!-- Rozetler -->
+        <div class="flex items-center space-x-1.5" title="Kazanılan Enerji Rozetleri">
+          <span class="text-xs font-bold text-blue-200 hidden sm:inline">ROZET:</span>
+          <div id="badges-summary" class="flex space-x-1">
+            <!-- Badges preview -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Level Progress Tracker Line -->
+    <div class="bg-bilfen-primary px-4 py-2 border-t border-blue-400/20">
+      <div class="max-w-4xl mx-auto flex items-center justify-between text-xs md:text-sm font-semibold">
+        <div id="lvl-badge-1" class="flex items-center space-x-1.5 transition-all text-white/90">
+          <span class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold bg-white text-bilfen-primary">1</span>
+          <span>Enerjiyi Bul</span>
+        </div>
+        <div class="text-white/40">›</div>
+        <div id="lvl-badge-2" class="flex items-center space-x-1.5 transition-all text-white/40">
+          <span class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold bg-white/20 text-white">2</span>
+          <span>İletken Avcısı</span>
+        </div>
+        <div class="text-white/40">›</div>
+        <div id="lvl-badge-3" class="flex items-center space-x-1.5 transition-all text-white/40">
+          <span class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold bg-white/20 text-white">3</span>
+          <span>Devreyi Kurtar</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-3xl w-full mx-auto p-4 md:p-6 flex-1 flex flex-col justify-center">
+
+    <!-- EKRAN 1: ANA SAYFA (HOME SCREEN) -->
+    <div id="screen-home" class="bg-white rounded-3xl p-6 md:p-8 shadow-xl border-2 border-blue-100 text-center transition-all">
+      <div class="w-32 h-32 mx-auto mb-4 animate-float">
+        <!-- Robi Büyük SVG İllüstrasyonu -->
+        <svg viewBox="0 0 160 160" class="w-full h-full drop-shadow-md">
+          <rect x="40" y="45" width="80" height="70" rx="20" fill="#E2E8F0" stroke="#002B66" stroke-width="5"/>
+          <circle cx="65" cy="72" r="10" fill="#1E75E8"/>
+          <circle cx="95" cy="72" r="10" fill="#1E75E8"/>
+          <circle cx="68" cy="70" r="3" fill="#FFFFFF"/>
+          <circle cx="98" cy="70" r="3" fill="#FFFFFF"/>
+          <path d="M62 93 Q80 106 98 93" stroke="#002B66" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <!-- Anten -->
+          <rect x="76" y="20" width="8" height="25" fill="#94A3B8"/>
+          <circle cx="80" cy="18" r="11" fill="#F59E0B" class="animate-glow"/>
+          <!-- Kulaklar/Vidalar -->
+          <rect x="25" y="65" width="15" height="25" rx="5" fill="#94A3B8" stroke="#002B66" stroke-width="3"/>
+          <rect x="120" y="65" width="15" height="25" rx="5" fill="#94A3B8" stroke="#002B66" stroke-width="3"/>
+          <!-- Göğüs Enerji Kalbi -->
+          <rect x="52" y="120" width="56" height="35" rx="12" fill="#0B4DB7"/>
+          <path d="M80 128 L84 136 L76 136 L80 145" stroke="#FDE047" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+
+      <h1 class="text-2xl md:text-3xl font-black text-bilfen-dark mb-3 leading-snug">
+        Robi Karanlıkta Kaldı: Onu El Fenerine Ulaştır!
+      </h1>
+
+      <p class="text-slate-600 font-medium text-base md:text-lg mb-4 max-w-xl mx-auto leading-relaxed">
+        Robi karanlıkta kaldı! Enerjiyi bul, iletkenleri seç ve devreyi tamamlayarak onu çalışan el fenerine ulaştır. Her görev +10 puan; yanlış cevap bir can götürür.
+      </p>
+
+      <div class="inline-flex items-center gap-2 bg-blue-50 text-bilfen-primary font-bold px-4 py-2 rounded-full border border-blue-200 text-sm mb-8">
+        <span>⚡ 3 seviye</span>
+        <span>•</span>
+        <span>🎯 9 görev</span>
+        <span>•</span>
+        <span>🏅 3 enerji rozeti</span>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center max-w-md mx-auto">
+        <button id="btn-start-game" class="w-full sm:w-auto flex-1 bg-bilfen-primary hover:bg-bilfen-dark text-white font-extrabold text-lg py-3.5 px-8 rounded-2xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2">
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+          <span id="txt-start-btn">Başla</span>
+        </button>
+
+        <button id="btn-reset-game-home" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-base py-3.5 px-6 rounded-2xl transition-all">
+          Yeniden Başla
+        </button>
+      </div>
+    </div>
+
+    <!-- EKRAN 2: GÖREV VE SORU EKRANI (PLAY SCREEN) -->
+    <div id="screen-quiz" class="hidden flex-col gap-4">
+      
+      <!-- Soru Kartı -->
+      <div class="bg-white rounded-3xl p-5 md:p-7 shadow-xl border-2 border-blue-100">
+        
+        <!-- Header Info -->
+        <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+          <div class="flex items-center space-x-2">
+            <span class="px-3 py-1 bg-blue-100 text-bilfen-dark rounded-xl font-black text-xs md:text-sm tracking-wider" id="quest-tracker">
+              LEVEL 1 · Görev 1 / 3
+            </span>
+            <span class="text-xs font-bold text-slate-500 hidden sm:inline" id="quest-theme-name">
+              Enerjiyi Bul
+            </span>
+          </div>
+          <div class="flex items-center text-xs font-semibold text-slate-500">
+            <span id="quest-type-hint" class="bg-slate-100 px-2.5 py-1 rounded-lg">Tekli Seçim</span>
+          </div>
+        </div>
+
+        <!-- Soru İllüstrasyon Alanı (Dinamik SVG'ler için) -->
+        <div id="question-media-container" class="mb-5 flex justify-center items-center bg-blue-50/70 p-4 rounded-2xl border border-blue-100 min-h-[140px] max-h-[220px] overflow-hidden">
+          <!-- Dinamik içerik buraya gelir -->
+        </div>
+
+        <!-- Soru Metni -->
+        <h2 id="question-text" class="text-lg md:text-xl font-bold text-bilfen-dark mb-5 leading-snug">
+          Soru metni yükleniyor...
+        </h2>
+
+        <!-- Seçenekler Listesi -->
+        <div id="options-container" class="grid grid-cols-1 gap-3">
+          <!-- Seçenek düğmeleri JS tarafından render edilir -->
+        </div>
+
+        <!-- Çoklu Seçim Değerlendirme Düğmesi -->
+        <div id="multi-check-container" class="hidden mt-4 pt-2">
+          <p id="multi-choice-hint" class="text-xs text-slate-500 font-semibold mb-2 text-center">
+            Seçimlerini yaptıktan sonra aşağıdaki butona tıkla:
+          </p>
+          <button id="btn-check-multi" class="w-full bg-bilfen-primary hover:bg-bilfen-dark text-white font-extrabold text-base py-3.5 px-6 rounded-2xl shadow-md transition-all flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            <span id="btn-check-multi-text">Seçimleri Kontrol Et</span>
+          </button>
+        </div>
+
+        <!-- Geri Bildirim ve İpucu Alanı -->
+        <div id="feedback-box" class="hidden mt-5 p-4 rounded-2xl border transition-all text-sm md:text-base font-semibold">
+          <!-- Mesaj dinamik gelir -->
+        </div>
+
+        <!-- Karar Butonları: "Devam" üstte, "Ana Menü" altta ayrı satırda -->
+        <div class="mt-6 flex flex-col gap-3">
+          <!-- Devam Düğmesi -->
+          <button id="btn-continue-quest" class="hidden w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black text-lg py-3.5 px-6 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2 animate-bounce">
+            <span>Devam</span>
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+          </button>
+
+          <!-- Ana Menü Düğmesi (Altta, ayrı satırda) -->
+          <button id="btn-return-home" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-sm py-2.5 px-4 rounded-xl transition-all">
+            Ana Menü
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- EKRAN 3: LEVEL TAMAMLANDI EKRANI (LEVEL COMPLETE) -->
+    <div id="screen-level-success" class="hidden bg-white rounded-3xl p-6 md:p-8 shadow-xl border-2 border-emerald-100 text-center">
+      <div class="w-24 h-24 mx-auto mb-4 bg-emerald-50 rounded-full flex items-center justify-center p-3 border-2 border-emerald-200">
+        <svg id="lvl-success-badge-icon" class="w-16 h-16 text-yellow-500 animate-glow" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+      </div>
+
+      <span class="inline-block px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-black uppercase tracking-wider mb-2">Tebrikler!</span>
+      <h2 id="lvl-success-title" class="text-2xl font-black text-bilfen-dark mb-2">
+        Enerjiyi Bul Rozetini Kazandın!
+      </h2>
+      <p id="lvl-success-desc" class="text-slate-600 font-medium text-base mb-6 max-w-md mx-auto">
+        Elektrik enerjisinin ışık ve hareket oluşturabileceğini keşfettin.
+      </p>
+
+      <div class="p-4 bg-blue-50 rounded-2xl border border-blue-100 max-w-sm mx-auto mb-6 flex justify-around items-center">
+        <div>
+          <span class="text-xs text-slate-500 font-semibold block">Mevcut Puan</span>
+          <span id="lvl-success-score" class="text-2xl font-black text-bilfen-primary">30 / 90</span>
+        </div>
+        <div class="w-px h-8 bg-blue-200"></div>
+        <div>
+          <span class="text-xs text-slate-500 font-semibold block">Kalan Can</span>
+          <span id="lvl-success-hearts" class="text-2xl font-black text-red-500">❤️❤️❤️</span>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-3 max-w-md mx-auto">
+        <!-- Sonraki Level veya El Fenerini Kurtar Düğmesi -->
+        <button id="btn-next-level" class="w-full bg-bilfen-primary hover:bg-bilfen-dark text-white font-extrabold text-lg py-3.5 px-8 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2">
+          <span>Sonraki Level</span>
+          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        </button>
+
+        <button id="btn-lvl-success-home" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-sm py-2.5 px-4 rounded-xl transition-all">
+          Ana Menü
+        </button>
+      </div>
+    </div>
+
+    <!-- EKRAN 4: CANLAR BİTTİ (GAME OVER) EKRANI -->
+    <div id="screen-game-over" class="hidden bg-white rounded-3xl p-6 md:p-8 shadow-xl border-2 border-red-100 text-center">
+      <div class="w-20 h-20 mx-auto mb-4 bg-red-50 rounded-full flex items-center justify-center text-3xl border border-red-200">
+        ⚡🔌
+      </div>
+      <h2 class="text-xl md:text-2xl font-black text-bilfen-dark mb-3">
+        Devre henüz tamamlanmadı. Öğrendiklerini hatırla ve tekrar dene!
+      </h2>
+      <p class="text-slate-600 font-medium text-sm md:text-base mb-6 max-w-md mx-auto">
+        Canların tükendi ancak pes etmek yok! Bu seviyeyi 3 canla tekrar deneyebilirsin. Önceki seviyelerdeki rozetlerin ve puanların korundu.
+      </p>
+
+      <div class="flex flex-col gap-3 max-w-sm mx-auto">
+        <button id="btn-retry-level" class="w-full bg-bilfen-primary hover:bg-bilfen-dark text-white font-extrabold text-base py-3.5 px-6 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          <span>Tekrar Dene</span>
+        </button>
+        <button id="btn-game-over-home" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-sm py-2.5 px-4 rounded-xl transition-all">
+          Ana Menü
+        </button>
+      </div>
+    </div>
+
+    <!-- EKRAN 5: FİNAL EKRANI (ROBİ KURTULDU!) -->
+    <div id="screen-final" class="hidden bg-white rounded-3xl p-6 md:p-8 shadow-xl border-2 border-yellow-200 text-center">
+      
+      <!-- Robi & Yanan El Feneri Büyük Görseli -->
+      <div class="w-full max-w-xs mx-auto mb-4 bg-slate-900 rounded-2xl p-4 shadow-inner relative overflow-hidden">
+        <svg viewBox="0 0 200 140" class="w-full h-auto">
+          <!-- Fenerden çıkan ışık huzmesi -->
+          <polygon points="120,70 195,20 195,120" fill="rgba(253, 224, 71, 0.45)" class="animate-pulse"/>
+          <!-- Robi Karakteri -->
+          <rect x="25" y="40" width="45" height="45" rx="10" fill="#E2E8F0" stroke="#002B66" stroke-width="3"/>
+          <circle cx="38" cy="55" r="5" fill="#1E75E8"/>
+          <circle cx="56" cy="55" r="5" fill="#1E75E8"/>
+          <path d="M38 70 Q47 78 56 70" stroke="#002B66" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <circle cx="47" cy="28" r="6" fill="#F59E0B"/>
+          <rect x="45" y="32" width="4" height="8" fill="#94A3B8"/>
+          <!-- El Feneri Gövdesi -->
+          <rect x="75" y="60" width="45" height="20" rx="4" fill="#0B4DB7" stroke="#FFFFFF" stroke-width="2"/>
+          <polygon points="120,55 128,52 128,88 120,85" fill="#F59E0B" stroke="#FFFFFF" stroke-width="1.5"/>
+          <!-- LED Işık Parıltısı -->
+          <circle cx="128" cy="70" r="10" fill="#FEF08A" class="animate-glow"/>
+        </svg>
+      </div>
+
+      <h1 class="text-2xl md:text-3xl font-black text-bilfen-dark mb-2">
+        Tebrikler! Robi’nin el fenerini kurtardın.
+      </h1>
+      <p class="text-slate-600 font-medium text-base mb-5">
+        Bütün zorlukları aştın, elektrik devresini başarıyla kurdun ve Robi'nin yolunu aydınlattın!
+      </p>
+
+      <!-- Rozet Koleksiyonu -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-lg mx-auto mb-6">
+        <div class="bg-blue-50 border border-blue-200 rounded-2xl p-3 flex flex-col items-center">
+          <div class="w-10 h-10 rounded-full bg-yellow-400 text-white flex items-center justify-center font-bold text-lg mb-1 shadow">⚡</div>
+          <span class="text-xs font-extrabold text-bilfen-dark">Enerjiyi Tanıdım</span>
+          <span class="text-emerald-600 text-xs font-black">✓</span>
+        </div>
+        <div class="bg-blue-50 border border-blue-200 rounded-2xl p-3 flex flex-col items-center">
+          <div class="w-10 h-10 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-lg mb-1 shadow">🔍</div>
+          <span class="text-xs font-extrabold text-bilfen-dark">İletkeni Buldum</span>
+          <span class="text-emerald-600 text-xs font-black">✓</span>
+        </div>
+        <div class="bg-blue-50 border border-blue-200 rounded-2xl p-3 flex flex-col items-center">
+          <div class="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-lg mb-1 shadow">💡</div>
+          <span class="text-xs font-extrabold text-bilfen-dark">Devreyi Tamamladım</span>
+          <span class="text-emerald-600 text-xs font-black">✓</span>
+        </div>
+      </div>
+
+      <!-- Toplam Puan Kutusu -->
+      <div class="bg-amber-50 border-2 border-amber-300 rounded-2xl p-3.5 max-w-xs mx-auto mb-6">
+        <span class="text-xs font-bold text-amber-800 uppercase tracking-wide block">GÖREV BAŞARISI</span>
+        <span id="final-score-text" class="text-2xl font-black text-bilfen-dark">Toplam puanın: 90 / 90</span>
+      </div>
+
+      <!-- Butonlar -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
+        <button id="btn-go-design-time" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-base py-3.5 px-6 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2">
+          <span>Şimdi Tasarım Zamanı!</span>
+          <span>🎨</span>
+        </button>
+        <button id="btn-replay-all" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-base py-3.5 px-6 rounded-2xl transition-all">
+          Yeniden Oyna
+        </button>
+      </div>
+
+    </div>
+
+    <!-- EKRAN 6: SINIF ETKİNLİĞİNE GEÇİŞ (TASARIM ATÖLYESİ) -->
+    <div id="screen-activity" class="hidden bg-white rounded-3xl p-6 md:p-8 shadow-xl border-2 border-blue-200">
+      <div class="flex items-center space-x-3 mb-4">
+        <div class="w-12 h-12 rounded-2xl bg-bilfen-primary text-white flex items-center justify-center text-2xl shadow-md">
+          🛠️
+        </div>
+        <div>
+          <span class="text-xs font-bold text-bilfen-primary uppercase tracking-wider">Atölye Yönergesi</span>
+          <h2 class="text-xl md:text-2xl font-black text-bilfen-dark">Şimdi sıra kendi el fenerini tasarlamakta!</h2>
+        </div>
+      </div>
+
+      <!-- Yönergeler Listesi -->
+      <div class="space-y-3.5 my-6 text-slate-700 font-medium text-sm md:text-base">
+        <div class="flex items-start space-x-3 bg-blue-50/70 p-3.5 rounded-2xl border border-blue-100">
+          <div class="w-7 h-7 rounded-xl bg-bilfen-primary text-white flex-shrink-0 flex items-center justify-center font-bold text-xs mt-0.5">1</div>
+          <p><strong class="text-bilfen-dark font-bold">Gövdeyi oluştur. İletken yolu planla.</strong> LED’in yönünü ve pil temasını kontrol et.</p>
+        </div>
+
+        <div class="flex items-start space-x-3 bg-amber-50/70 p-3.5 rounded-2xl border border-amber-100">
+          <div class="w-7 h-7 rounded-xl bg-amber-500 text-white flex-shrink-0 flex items-center justify-center font-bold text-xs mt-0.5">2</div>
+          <p><strong class="text-amber-900 font-bold">LED yanmıyorsa</strong> hangi bağlantıyı kontrol edeceğini arkadaşınla paylaş.</p>
+        </div>
+
+        <div class="flex items-start space-x-3 bg-rose-50/80 p-3.5 rounded-2xl border border-rose-200">
+          <div class="w-7 h-7 rounded-xl bg-rose-500 text-white flex-shrink-0 flex items-center justify-center font-bold text-xs mt-0.5">⚠️</div>
+          <p><strong class="text-rose-900 font-bold">Güvenlik Kuralı:</strong> Malzemeleri öğretmeninle kullan; pilin iki ucunu doğrudan birbirine bağlama.</p>
+        </div>
+      </div>
+
+      <!-- Butonlar: "Yeniden Oyna" ve "Ana Menü" -->
+      <div class="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto pt-2">
+        <button id="btn-activity-replay" class="flex-1 bg-bilfen-primary hover:bg-bilfen-dark text-white font-extrabold text-base py-3.5 px-6 rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2">
+          <span>Yeniden Oyna</span>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        </button>
+
+        <button id="btn-activity-home" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-base py-3.5 px-6 rounded-2xl transition-all">
+          Ana Menü
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="bg-slate-100 border-t border-slate-200 py-3 px-4 text-center text-xs text-slate-500">
+    <div class="max-w-4xl mx-auto flex flex-wrap justify-between items-center gap-2">
+      <span>Bilfen Fen Bilimleri · 4. Sınıf Elektrik Devreleri & LED El Feneri Projesi</span>
+      <span class="font-semibold text-bilfen-primary">Karakter: Robi</span>
+    </div>
+  </footer>
+
+  <script>
+    /* ==========================================================================
+       SES EFEKTLERİ MOTORU (Web Audio API - Harici URL Olmadan Çalışır)
+       ========================================================================== */
+    class AudioEngine {
+      constructor() {
+        this.ctx = null;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            this.ctx = new AudioContext();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+      playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.1) {
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + duration);
+        } catch(e) {
+          // Ses çalma hatası sessizce yutulur
+        }
+      }
+      correct() {
+        this.playTone(523.25, 'triangle', 0.12, 0.15); // C5
+        setTimeout(() => this.playTone(659.25, 'triangle', 0.15, 0.15), 100); // E5
+        setTimeout(() => this.playTone(783.99, 'triangle', 0.25, 0.15), 200); // G5
+      }
+      wrong() {
+        this.playTone(261.63, 'sawtooth', 0.15, 0.12);
+        setTimeout(() => this.playTone(207.65, 'sawtooth', 0.25, 0.12), 120);
+      }
+      levelUp() {
+        [440, 554, 659, 880].forEach((f, idx) => {
+          setTimeout(() => this.playTone(f, 'sine', 0.2, 0.15), idx * 110);
+        });
+      }
+      click() {
+        this.playTone(700, 'sine', 0.05, 0.05);
+      }
+    }
+
+    const sound = new AudioEngine();
+
+    const GAME_DATA = [
+      // ==========================================
+      // LEVEL 1: ENERJİYİ BUL
+      // ==========================================
+      {
+        level: 1,
+        title: "ENERJİYİ BUL",
+        badgeName: "Enerjiyi Tanıdım",
+        badgeSuccessTitle: "Enerjiyi Bul Rozetini Kazandın!",
+        badgeSuccessDesc: "Elektrik enerjisinin ışık ve hareket oluşturabileceğini keşfettin.",
+        quests: [
+          {
+            id: "L1_Q1",
+            type: "single",
+            question: "Topacımızı döndürmek için hangi enerjiyi kullandık?",
+            options: [
+              { key: "A", text: "Elektrik enerjisi" },
+              { key: "B", text: "Kas enerjisi" },
+              { key: "C", text: "Işık enerjisi" }
+            ],
+            correct: "B",
+            feedback: "Kaslarımızın uyguladığı kuvvet topacın hareket etmesini sağladı. +10 puan!",
+            hint: "Topacı elimizle harekete geçirmiştik. Kaslarımızın uyguladığı kuvveti düşün!",
+            svg: `
+              <svg viewBox="0 0 200 120" class="w-48 h-auto">
+                <defs>
+                  <linearGradient id="topGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#3B82F6"/>
+                    <stop offset="100%" stop-color="#1D4ED8"/>
+                  </linearGradient>
+                </defs>
+                <!-- Dönen Topaç Görseli -->
+                <ellipse cx="100" cy="55" rx="42" ry="18" fill="url(#topGrad)" stroke="#002B66" stroke-width="3"/>
+                <polygon points="58,55 142,55 100,105" fill="#EF4444" stroke="#002B66" stroke-width="3"/>
+                <rect x="96" y="25" width="8" height="30" rx="3" fill="#F59E0B" stroke="#002B66" stroke-width="2"/>
+                <circle cx="100" cy="105" r="4" fill="#64748B"/>
+                <!-- Dönme çizgileri -->
+                <path d="M40 70 Q100 85 160 70" stroke="#93C5FD" stroke-width="3" stroke-dasharray="4 4" fill="none"/>
+                <path d="M45 40 Q100 25 155 40" stroke="#93C5FD" stroke-width="3" stroke-dasharray="4 4" fill="none"/>
+                <text x="100" y="118" text-anchor="middle" font-size="11" font-weight="bold" fill="#002B66">Topaç</text>
+              </svg>
+            `
+          },
+          {
+            id: "L1_Q2",
+            type: "single",
+            question: "Ampulün yanmasını ve pervanenin dönmesini sağlayan neydi?",
+            options: [
+              { key: "A", text: "Elektrik enerjisi" },
+              { key: "B", text: "Kas enerjisi" },
+              { key: "C", text: "Ses enerjisi" }
+            ],
+            correct: "A",
+            feedback: "Elektrik enerjisi ışık ve hareket oluşturabilir. +10 puan!",
+            hint: "Pil, devreye hangi enerjiyi sağlıyordu?",
+            svg: `
+              <svg viewBox="0 0 220 120" class="w-56 h-auto">
+                <!-- Pil -->
+                <rect x="25" y="45" width="55" height="35" rx="6" fill="#0B4DB7" stroke="#002B66" stroke-width="3"/>
+                <rect x="80" y="55" width="6" height="15" fill="#F59E0B" rx="1"/>
+                <text x="52" y="68" fill="#FFFFFF" font-size="12" font-weight="black" text-anchor="middle">PİL (+)</text>
+                <!-- Enerji Oku -->
+                <path d="M100 62 L130 62" stroke="#F59E0B" stroke-width="4" stroke-linecap="round"/>
+                <polygon points="130,55 142,62 130,69" fill="#F59E0B"/>
+                <!-- Yanan Ampul Simgesi -->
+                <circle cx="170" cy="55" r="20" fill="#FEF08A" stroke="#EAB308" stroke-width="3"/>
+                <path d="M165 75 L175 75 L173 83 L167 83 Z" fill="#94A3B8" stroke="#475569" stroke-width="2"/>
+                <text x="170" y="112" text-anchor="middle" font-size="11" font-weight="bold" fill="#002B66">Elektrik Kaynağı</text>
+              </svg>
+            `
+          },
+          {
+            id: "L1_Q3",
+            type: "single",
+            question: "Elektrik enerjisi ampul ve pervanede hangi sonuçları oluşturdu?",
+            options: [
+              { key: "A", text: "Işık ve hareket" },
+              { key: "B", text: "Ses ve ısı" },
+              { key: "C", text: "Yalnızca hareket" }
+            ],
+            correct: "A",
+            feedback: "Enerji bağlantısını çözdün! Ampul ışık, pervane hareket oluşturdu. +10 puan!",
+            hint: "Ampul çevremizi aydınlatır; pervane döner.",
+            svg: `
+              <svg viewBox="0 0 240 120" class="w-64 h-auto">
+                <!-- Ampul Görseli -->
+                <g transform="translate(40, 20)">
+                  <circle cx="25" cy="30" r="22" fill="#FEF08A" stroke="#EAB308" stroke-width="3" class="animate-pulse"/>
+                  <path d="M18 52 L32 52 L30 62 L20 62 Z" fill="#94A3B8"/>
+                  <line x1="25" y1="5" x2="25" y2="0" stroke="#F59E0B" stroke-width="3"/>
+                  <line x1="5" y1="20" x2="0" y2="15" stroke="#F59E0B" stroke-width="3"/>
+                  <line x1="45" y1="20" x2="50" y2="15" stroke="#F59E0B" stroke-width="3"/>
+                  <text x="25" y="78" text-anchor="middle" font-size="11" font-weight="bold" fill="#002B66">Ampul (Işık)</text>
+                </g>
+                <!-- Pervane Görseli -->
+                <g transform="translate(150, 20)">
+                  <circle cx="35" cy="35" r="7" fill="#002B66"/>
+                  <ellipse cx="35" cy="15" rx="8" ry="16" fill="#3B82F6"/>
+                  <ellipse cx="35" cy="55" rx="8" ry="16" fill="#3B82F6"/>
+                  <ellipse cx="15" cy="35" rx="16" ry="8" fill="#1D4ED8"/>
+                  <ellipse cx="55" cy="35" rx="16" ry="8" fill="#1D4ED8"/>
+                  <text x="35" y="78" text-anchor="middle" font-size="11" font-weight="bold" fill="#002B66">Pervane (Hareket)</text>
+                </g>
+              </svg>
+            `
+          }
+        ]
+      },
+
+      // ==========================================
+      // LEVEL 2: İLETKEN AVCISI
+      // ==========================================
+      {
+        level: 2,
+        title: "İLETKEN AVCISI",
+        badgeName: "İletkeni Buldum",
+        badgeSuccessTitle: "İletken Avcısı Rozetini Kazandın!",
+        badgeSuccessDesc: "İletkenleri ayırt ettin ve tasarımda malzemelerin görevini buldun.",
+        quests: [
+          {
+            id: "L2_Q1",
+            type: "multi",
+            maxChoices: 3,
+            question: "Elektriği iletebilecek üç malzemeyi seç!",
+            options: [
+              { id: "opt1", text: "Bakır bant" },
+              { id: "opt2", text: "Dil çubuğu" },
+              { id: "opt3", text: "Metal kıskaç" },
+              { id: "opt4", text: "Plastik" },
+              { id: "opt5", text: "Metal bağlantı teli" }
+            ],
+            // Doğru seçimler: Bakır bant (opt1), Metal kıskaç (opt3), Metal bağlantı teli (opt5)
+            correctSet: ["opt1", "opt3", "opt5"],
+            feedback: "Bakır bant, metal kıskaç ve metal bağlantı teli elektriği iletebilir. +10 puan!",
+            hint: "Metaller genellikle iletkendir. Kuru tahta ve plastik yalıtkandır.",
+            svg: `
+              <svg viewBox="0 0 260 110" class="w-64 h-auto">
+                <!-- İletken Madde Simgeleri -->
+                <rect x="20" y="35" width="60" height="20" rx="3" fill="#B45309" stroke="#78350F" stroke-width="2"/>
+                <text x="50" y="72" text-anchor="middle" font-size="10" font-weight="bold" fill="#78350F">Bakır Bant</text>
+                <!-- Metal Kıskaç -->
+                <path d="M110 30 Q130 15 150 30 L145 60 L115 60 Z" fill="#94A3B8" stroke="#475569" stroke-width="2"/>
+                <text x="130" y="75" text-anchor="middle" font-size="10" font-weight="bold" fill="#334155">Metal Kıskaç</text>
+                <!-- Tel -->
+                <path d="M190 40 Q210 20 230 40 T250 40" stroke="#3B82F6" stroke-width="5" fill="none" stroke-linecap="round"/>
+                <text x="220" y="72" text-anchor="middle" font-size="10" font-weight="bold" fill="#1E40AF">Metal Tel</text>
+              </svg>
+            `
+          },
+          {
+            id: "L2_Q2",
+            type: "single",
+            question: "El fenerimizde elektriğin ilerleyeceği yolu hangisi oluşturabilir?",
+            options: [
+              { key: "A", text: "Dil çubuğu" },
+              { key: "B", text: "Bakır bant" }
+            ],
+            correct: "B",
+            feedback: "Bakır bant iletkendir ve devrede bağlantı yolu oluşturabilir. +10 puan!",
+            hint: "Bakır bir metaldir. Kuru tahta elektriği iletmez.",
+            svg: `
+              <svg viewBox="0 0 240 110" class="w-64 h-auto">
+                <!-- Dil Çubuğu Görseli -->
+                <g transform="translate(25, 25)">
+                  <rect x="0" y="10" width="80" height="22" rx="11" fill="#FDE68A" stroke="#D97706" stroke-width="2"/>
+                  <text x="40" y="50" text-anchor="middle" font-size="11" font-weight="bold" fill="#92400E">Dil Çubuğu</text>
+                </g>
+                <!-- Bakır Bant Görseli -->
+                <g transform="translate(135, 25)">
+                  <rect x="0" y="12" width="80" height="18" rx="3" fill="#D97706" stroke="#92400E" stroke-width="2"/>
+                  <line x1="5" y1="21" x2="75" y2="21" stroke="#FDE68A" stroke-width="2" stroke-dasharray="3 3"/>
+                  <text x="40" y="50" text-anchor="middle" font-size="11" font-weight="bold" fill="#B45309">Bakır Bant</text>
+                </g>
+              </svg>
+            `
+          },
+          {
+            id: "L2_Q3",
+            type: "single",
+            question: "El fenerimizde hangi malzeme elektriği iletmez?",
+            options: [
+              { key: "A", text: "Bakır bant" },
+              { key: "B", text: "Dil çubuğu" },
+              { key: "C", text: "Metal bağlantı teli" }
+            ],
+            correct: "B",
+            feedback: "Kuru dil çubuğu yalıtkandır. Elektriği iletmez; bakır bant ve metal tel iletkendir. +10 puan!",
+            hint: "Bakır ve bağlantı teli metaldir. Kuru tahta ise yalıtkandır.",
+            svg: `
+              <svg viewBox="0 0 200 110" class="w-48 h-auto">
+                <circle cx="100" cy="50" r="38" fill="#FEE2E2" stroke="#EF4444" stroke-width="3"/>
+                <!-- Yalıtkan / Geçilmez işareti -->
+                <line x1="75" y1="25" x2="125" y2="75" stroke="#EF4444" stroke-width="5" stroke-linecap="round"/>
+                <text x="100" y="55" text-anchor="middle" font-size="28">🪵</text>
+                <text x="100" y="103" text-anchor="middle" font-size="11" font-weight="bold" fill="#991B1B">Yalıtkan Madde</text>
+              </svg>
+            `
+          }
+        ]
+      },
+
+      // ==========================================
+      // LEVEL 3: DEVREYİ KURTAR
+      // ==========================================
+      {
+        level: 3,
+        title: "DEVREYİ KURTAR",
+        badgeName: "Devreyi Tamamladım",
+        badgeSuccessTitle: "Devreyi Kurtar Rozetini Kazandın!",
+        badgeSuccessDesc: "LED’in yönünü ve tamamlanmış bir devrenin önemini keşfettin.",
+        quests: [
+          {
+            id: "L3_Q1",
+            type: "single",
+            question: "Yeni bir LED’in hangi bacağı pilin (+) ucuna bağlanmalıdır?",
+            options: [
+              { key: "A", text: "Uzun bacak" },
+              { key: "B", text: "Kısa bacak" }
+            ],
+            correct: "A",
+            feedback: "Doğru! Bacakları kesilmemiş LED’in uzun bacağı (+), kısa bacağı (−) bağlantısına gider. +10 puan!",
+            hint: "Uzun bacak artı (+) bağlantısıyla ilişkilidir.",
+            svg: `
+              <svg viewBox="0 0 220 130" class="w-56 h-auto">
+                <!-- LED Kafası -->
+                <path d="M90 40 Q90 15 110 15 Q130 15 130 40 L134 44 L86 44 Z" fill="#EF4444" stroke="#991B1B" stroke-width="2"/>
+                <rect x="84" y="44" width="52" height="5" rx="1.5" fill="#DC2626"/>
+                <!-- Uzun Bacak (+) -->
+                <line x1="100" y1="49" x2="100" y2="105" stroke="#94A3B8" stroke-width="4" stroke-linecap="round"/>
+                <!-- Kısa Bacak (-) -->
+                <line x1="120" y1="49" x2="120" y2="85" stroke="#94A3B8" stroke-width="4" stroke-linecap="round"/>
+                <!-- Etiketler -->
+                <text x="82" y="105" font-size="11" font-weight="black" fill="#B91C1C">Uzun (+)</text>
+                <text x="138" y="85" font-size="11" font-weight="black" fill="#475569">Kısa (−)</text>
+              </svg>
+            `
+          },
+          {
+            id: "L3_Q2",
+            type: "single",
+            question: "Devrenin tamamlanması için eksik olan nedir?",
+            options: [
+              { key: "A", text: "LED’den pilin diğer ucuna uzanan bakır bant" },
+              { key: "B", text: "Pil ile LED arasına plastik bir parça koymak" },
+              { key: "C", text: "Bakır bant yerine dil çubuğu kullanmak" }
+            ],
+            correct: "A",
+            feedback: "Elektrik devresinin çalışması için kesintisiz bir bağlantı yolu gerekir. +10 puan!",
+            hint: "Yolun pilin diğer ucuna kadar tamamlanması gerekir.",
+            svg: `
+              <svg viewBox="0 0 280 120" class="w-72 h-auto">
+                <!-- Akış Şeması -->
+                <g transform="translate(10, 30)">
+                  <!-- Pil (+) -->
+                  <rect x="0" y="10" width="50" height="30" rx="4" fill="#0B4DB7"/>
+                  <text x="25" y="30" fill="#FFFFFF" font-size="10" font-weight="bold" text-anchor="middle">Pil (+)</text>
+                  <!-- Bant 1 -->
+                  <path d="M50 25 L80 25" stroke="#D97706" stroke-width="5"/>
+                  <!-- LED -->
+                  <rect x="80" y="12" width="30" height="26" rx="4" fill="#EF4444"/>
+                  <text x="95" y="29" fill="#FFFFFF" font-size="10" font-weight="bold" text-anchor="middle">LED</text>
+                  <!-- Soru İşareti / Boşluk -->
+                  <path d="M110 25 L135 25" stroke="#EF4444" stroke-width="3" stroke-dasharray="4 4"/>
+                  <rect x="135" y="10" width="40" height="30" rx="6" fill="#FEE2E2" stroke="#EF4444" stroke-width="2"/>
+                  <text x="155" y="31" fill="#B91C1C" font-size="16" font-weight="black" text-anchor="middle">?</text>
+                  <!-- Bant 2 Devamı -->
+                  <path d="M175 25 L200 25" stroke="#D97706" stroke-width="5"/>
+                  <!-- Pil (-) -->
+                  <rect x="200" y="10" width="50" height="30" rx="4" fill="#1E293B"/>
+                  <text x="225" y="30" fill="#FFFFFF" font-size="10" font-weight="bold" text-anchor="middle">Pil (−)</text>
+                </g>
+                <text x="140" y="95" text-anchor="middle" font-size="11" font-weight="bold" fill="#002B66">Pil (+) → Bakır bant → LED → ? → Pil (−)</text>
+              </svg>
+            `
+          },
+          {
+            id: "L3_Q3",
+            type: "multi",
+            maxChoices: 3,
+            question: "LED neden yanmıyor olabilir? Üç olası sorunu seç!",
+            options: [
+              { id: "p1", text: "LED’in uzun bacağı pilin (−) ucuna bağlanmış" },
+              { id: "p2", text: "Bakır bantların arasında boşluk kalmış" },
+              { id: "p3", text: "LED’in bacağı pile temas etmiyor" },
+              { id: "p4", text: "Dil çubuğu boyanmamış" }
+            ],
+            // Doğru seçimler: p1, p2, p3
+            correctSet: ["p1", "p2", "p3"],
+            feedback: "Devreyi kurtardın! LED’in yönünü düzelttin, boşluğu kapattın ve pil temasını sağladın. +10 puan!",
+            hint: "Uzun bacağın (+) uca bağlı olup olmadığını, bantlar arasındaki boşluğu ve pil temasını kontrol et. Çubuğu boyamak LED’i yakmaz.",
+            // Başlangıçta tamamlanmamış devre SVG'si
+            svg: `
+              <svg id="final-circuit-svg" viewBox="0 0 280 130" class="w-72 h-auto">
+                <!-- Temel Zemin (Dil Çubuğu) -->
+                <rect x="20" y="45" width="240" height="40" rx="12" fill="#FDE68A" stroke="#D97706" stroke-width="2"/>
+                
+                <!-- Pil -->
+                <rect x="35" y="52" width="40" height="26" rx="4" fill="#0B4DB7"/>
+                <text x="55" y="69" fill="#FFFFFF" font-size="9" font-weight="black" text-anchor="middle">PİL</text>
+                
+                <!-- İletken Bant Yolu 1 (Kopukluk var) -->
+                <path id="circuit-wire-1" d="M75 60 L120 60" stroke="#D97706" stroke-width="6" stroke-linecap="round"/>
+                <!-- Kopukluk Alanı -->
+                <circle id="circuit-gap-marker" cx="130" cy="60" r="7" fill="none" stroke="#EF4444" stroke-width="2" stroke-dasharray="2 2"/>
+                <path id="circuit-wire-2" d="M140 60 L180 60" stroke="#D97706" stroke-width="6" stroke-linecap="round"/>
+
+                <!-- LED Sembolü (Başta sönük) -->
+                <g id="circuit-led-group" transform="translate(180, 48)">
+                  <circle id="circuit-led-glow" cx="15" cy="12" r="14" fill="#94A3B8" stroke="#475569" stroke-width="2"/>
+                  <path d="M15 2 L15 -6" stroke="#94A3B8" stroke-width="2"/>
+                  <text id="circuit-led-txt" x="15" y="16" fill="#FFFFFF" font-size="9" font-weight="bold" text-anchor="middle">SÖNÜK</text>
+                </g>
+
+                <!-- Devre Durum Metni -->
+                <text id="circuit-status-text" x="140" y="112" text-anchor="middle" font-size="11" font-weight="bold" fill="#DC2626">⚠️ Devrede kopukluk & kutup hatası var!</text>
+              </svg>
+            `
+          }
+        ]
+      }
+    ];
+
+    const state = {
+      currentLevelIndex: 0,       // 0: Level 1, 1: Level 2, 2: Level 3
+      currentQuestIndex: 0,       // 0..2
+      score: 0,                   // 0..90
+      hearts: 3,                  // 3..0
+      completedLevels: [false, false, false],
+      earnedBadges: [false, false, false],
+      solvedQuests: {},           // Örn: {"L1_Q1": true} Çift puan engellemek için
+      selectedMultiChoices: new Set(),
+      isQuestAnswered: false,
+      hasGameStarted: false,
+      // Level başında kaydedilen skor (canlar bitince bu levelde kazanılan puanları geri almak için)
+      levelStartScore: 0
+    };
+
+    const els = {
+      // Screens
+      screenHome: document.getElementById('screen-home'),
+      screenQuiz: document.getElementById('screen-quiz'),
+      screenLevelSuccess: document.getElementById('screen-level-success'),
+      screenGameOver: document.getElementById('screen-game-over'),
+      screenFinal: document.getElementById('screen-final'),
+      screenActivity: document.getElementById('screen-activity'),
+
+      // HUD
+      heartsContainer: document.getElementById('hearts-container'),
+      scoreDisplay: document.getElementById('score-display'),
+      badgesSummary: document.getElementById('badges-summary'),
+      lvlBadge1: document.getElementById('lvl-badge-1'),
+      lvlBadge2: document.getElementById('lvl-badge-2'),
+      lvlBadge3: document.getElementById('lvl-badge-3'),
+
+      // Home Buttons
+      btnStartGame: document.getElementById('btn-start-game'),
+      txtStartBtn: document.getElementById('txt-start-btn'),
+      btnResetGameHome: document.getElementById('btn-reset-game-home'),
+
+      // Quiz Elements
+      questTracker: document.getElementById('quest-tracker'),
+      questThemeName: document.getElementById('quest-theme-name'),
+      questTypeHint: document.getElementById('quest-type-hint'),
+      questionMediaContainer: document.getElementById('question-media-container'),
+      questionText: document.getElementById('question-text'),
+      optionsContainer: document.getElementById('options-container'),
+      multiCheckContainer: document.getElementById('multi-check-container'),
+      btnCheckMulti: document.getElementById('btn-check-multi'),
+      feedbackBox: document.getElementById('feedback-box'),
+      btnContinueQuest: document.getElementById('btn-continue-quest'),
+      btnReturnHome: document.getElementById('btn-return-home'),
+
+      // Level Success
+      lvlSuccessTitle: document.getElementById('lvl-success-title'),
+      lvlSuccessDesc: document.getElementById('lvl-success-desc'),
+      lvlSuccessScore: document.getElementById('lvl-success-score'),
+      lvlSuccessHearts: document.getElementById('lvl-success-hearts'),
+      btnNextLevel: document.getElementById('btn-next-level'),
+      btnLvlSuccessHome: document.getElementById('btn-lvl-success-home'),
+
+      // Game Over
+      btnRetryLevel: document.getElementById('btn-retry-level'),
+      btnGameOverHome: document.getElementById('btn-game-over-home'),
+
+      // Final Screen
+      finalScoreText: document.getElementById('final-score-text'),
+      btnGoDesignTime: document.getElementById('btn-go-design-time'),
+      btnReplayAll: document.getElementById('btn-replay-all'),
+
+      // Activity Screen
+      btnActivityReplay: document.getElementById('btn-activity-replay'),
+      btnActivityHome: document.getElementById('btn-activity-home')
+    };
+
+    function updateHUD() {
+      // 1. Canlar (Kırmızı kalp simgeleri)
+      els.heartsContainer.innerHTML = '';
+      for (let i = 0; i < 3; i++) {
+        const heart = document.createElement('span');
+        heart.className = `text-base transition-transform ${i < state.hearts ? 'scale-100 text-red-500' : 'scale-90 opacity-25 grayscale'}`;
+        heart.innerHTML = '❤️';
+        els.heartsContainer.appendChild(heart);
+      }
+
+      // 2. Puan
+      els.scoreDisplay.textContent = state.score;
+
+      // 3. Rozet Mini Göstergeleri
+      const badgeIcons = ['⚡', '🔍', '💡'];
+      els.badgesSummary.innerHTML = '';
+      badgeIcons.forEach((icon, idx) => {
+        const badge = document.createElement('div');
+        const isEarned = state.earnedBadges[idx];
+        badge.className = `w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+          isEarned ? 'bg-amber-400 text-slate-900 shadow ring-2 ring-white/50' : 'bg-white/20 text-white/40'
+        }`;
+        badge.innerHTML = icon;
+        badge.title = isEarned ? `Level ${idx + 1} Rozeti Kazanıldı` : `Level ${idx + 1} Henüz Açılmadı`;
+        els.badgesSummary.appendChild(badge);
+      });
+
+      // 4. Seviye İlerleme Çubuğu Güncellemesi
+      const lvlElements = [els.lvlBadge1, els.lvlBadge2, els.lvlBadge3];
+      lvlElements.forEach((el, idx) => {
+        const isCompleted = state.completedLevels[idx];
+        const isCurrent = state.currentLevelIndex === idx;
+        const circle = el.querySelector('span:first-child');
+
+        if (isCompleted) {
+          el.className = 'flex items-center space-x-1.5 text-emerald-300 font-bold';
+          circle.className = 'w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold bg-emerald-400 text-slate-900';
+          circle.textContent = '✓';
+        } else if (isCurrent) {
+          el.className = 'flex items-center space-x-1.5 text-white font-extrabold';
+          circle.className = 'w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold bg-white text-bilfen-primary shadow';
+          circle.textContent = idx + 1;
+        } else {
+          el.className = 'flex items-center space-x-1.5 text-white/40 font-semibold';
+          circle.className = 'w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold bg-white/20 text-white';
+          circle.textContent = '🔒';
+        }
+      });
+
+      // Ana Sayfa Buton Metni
+      if (state.hasGameStarted) {
+        els.txtStartBtn.textContent = 'Oyuna Devam Et';
+      } else {
+        els.txtStartBtn.textContent = 'Başla';
+      }
+    }
+
+    function showScreen(screenId) {
+      const allScreens = [
+        els.screenHome,
+        els.screenQuiz,
+        els.screenLevelSuccess,
+        els.screenGameOver,
+        els.screenFinal,
+        els.screenActivity
+      ];
+      allScreens.forEach(sc => sc.classList.add('hidden'));
+
+      if (screenId === 'home') els.screenHome.classList.remove('hidden');
+      if (screenId === 'quiz') {
+        els.screenQuiz.classList.remove('hidden');
+        els.screenQuiz.classList.add('flex');
+      }
+      if (screenId === 'levelSuccess') els.screenLevelSuccess.classList.remove('hidden');
+      if (screenId === 'gameOver') els.screenGameOver.classList.remove('hidden');
+      if (screenId === 'final') els.screenFinal.classList.remove('hidden');
+      if (screenId === 'activity') els.screenActivity.classList.remove('hidden');
+
+      updateHUD();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function loadCurrentQuest() {
+      const currentLevel = GAME_DATA[state.currentLevelIndex];
+      const quest = currentLevel.quests[state.currentQuestIndex];
+
+      state.isQuestAnswered = false;
+      state.selectedMultiChoices.clear();
+
+      // UI Bilgilerini güncelle
+      els.questTracker.textContent = `LEVEL ${currentLevel.level} · Görev ${state.currentQuestIndex + 1} / 3`;
+      els.questThemeName.textContent = currentLevel.title;
+      els.questTypeHint.textContent = quest.type === 'multi' ? 'Çoklu Seçim' : 'Tekli Seçim';
+      els.questionText.textContent = quest.question;
+      els.questionMediaContainer.innerHTML = quest.svg;
+
+      // Geri bildirim ve Devam butonunu gizle
+      els.feedbackBox.classList.add('hidden');
+      els.feedbackBox.className = 'hidden mt-5 p-4 rounded-2xl border transition-all text-sm md:text-base font-semibold';
+      els.btnContinueQuest.classList.add('hidden');
+
+      // Çoklu seçim butonunu her yeni soruda kesin olarak sıfırla ve yeniden aktif et
+      els.btnCheckMulti.disabled = false;
+      els.btnCheckMulti.classList.remove('opacity-50', 'cursor-not-allowed', 'ring-4', 'ring-amber-300', 'bg-emerald-600', 'hover:bg-emerald-700');
+      els.btnCheckMulti.classList.add('bg-bilfen-primary', 'hover:bg-bilfen-dark');
+      const multiBtnText = document.getElementById('btn-check-multi-text');
+      if (multiBtnText) {
+        multiBtnText.textContent = 'Seçimleri Kontrol Et';
+      }
+
+      // Seçenekleri oluştur
+      els.optionsContainer.innerHTML = '';
+      if (quest.type === 'single') {
+        els.multiCheckContainer.classList.add('hidden');
+        quest.options.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.className = 'option-btn w-full text-left p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-bilfen-primary hover:bg-blue-50/50 text-slate-800 font-bold flex items-center justify-between text-base md:text-lg';
+          btn.dataset.key = opt.key;
+          btn.innerHTML = `
+            <div class="flex items-center space-x-3">
+              <span class="w-8 h-8 rounded-xl bg-slate-100 text-bilfen-primary flex items-center justify-center font-black text-sm border border-slate-200">${opt.key}</span>
+              <span>${opt.text}</span>
+            </div>
+            <span class="status-icon text-xl opacity-0">●</span>
+          `;
+          btn.addEventListener('click', () => handleSingleSelect(opt.key, btn, quest));
+          els.optionsContainer.appendChild(btn);
+        });
+      } else if (quest.type === 'multi') {
+        els.multiCheckContainer.classList.remove('hidden');
+        quest.options.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.className = 'option-btn w-full text-left p-4 rounded-2xl border-2 border-slate-200 bg-white hover:border-bilfen-accent text-slate-800 font-bold flex items-center justify-between text-base';
+          btn.dataset.id = opt.id;
+          btn.innerHTML = `
+            <div class="flex items-center space-x-3">
+              <span class="checkbox-indicator w-6 h-6 rounded-lg border-2 border-slate-300 flex items-center justify-center text-xs font-bold bg-white text-transparent">✓</span>
+              <span>${opt.text}</span>
+            </div>
+          `;
+          btn.addEventListener('click', () => toggleMultiChoice(opt.id, btn));
+          els.optionsContainer.appendChild(btn);
+        });
+      }
+    }
+
+    function handleSingleSelect(selectedKey, buttonEl, quest) {
+      if (state.isQuestAnswered) return;
+      sound.click();
+
+      const isCorrect = (selectedKey === quest.correct);
+
+      if (isCorrect) {
+        state.isQuestAnswered = true;
+        sound.correct();
+
+        // Puanı artır (daha önce çözülmediyse)
+        if (!state.solvedQuests[quest.id]) {
+          state.score = Math.min(90, state.score + 10);
+          state.solvedQuests[quest.id] = true;
+        }
+
+        // Seçenekleri kilitle ve görselleştir
+        Array.from(els.optionsContainer.children).forEach(btn => {
+          btn.disabled = true;
+          if (btn.dataset.key === quest.correct) {
+            btn.classList.remove('border-slate-200', 'bg-white');
+            btn.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-900');
+            const icon = btn.querySelector('.status-icon');
+            icon.textContent = '✓';
+            icon.classList.remove('opacity-0');
+            icon.classList.add('opacity-100', 'text-emerald-600', 'font-black');
+          } else {
+            btn.classList.add('opacity-50');
+          }
+        });
+
+        // Olumlu geri bildirim göster
+        showFeedback(true, quest.feedback);
+        els.btnContinueQuest.classList.remove('hidden');
+        updateHUD();
+
+      } else {
+        // Yanlış cevap
+        sound.wrong();
+        state.hearts = Math.max(0, state.hearts - 1);
+        updateHUD();
+
+        // Yanlış seçilen butona geçici hata efekti
+        buttonEl.classList.add('border-red-400', 'bg-red-50');
+        setTimeout(() => {
+          buttonEl.classList.remove('border-red-400', 'bg-red-50');
+        }, 800);
+
+        // Kısa öğretici ipucu göster
+        showFeedback(false, quest.hint);
+
+        // Can bittiyse Game Over ekranına geç
+        if (state.hearts <= 0) {
+          setTimeout(() => {
+            showScreen('gameOver');
+          }, 1100);
+        }
+      }
+    }
+
+    function toggleMultiChoice(id, btn) {
+      if (state.isQuestAnswered) return;
+      sound.click();
+
+      const checkbox = btn.querySelector('.checkbox-indicator');
+      if (state.selectedMultiChoices.has(id)) {
+        state.selectedMultiChoices.delete(id);
+        btn.classList.remove('border-bilfen-primary', 'bg-blue-50/70');
+        btn.classList.add('border-slate-200', 'bg-white');
+        checkbox.classList.remove('bg-bilfen-primary', 'border-bilfen-primary', 'text-white');
+        checkbox.classList.add('border-slate-300', 'bg-white', 'text-transparent');
+      } else {
+        state.selectedMultiChoices.add(id);
+        btn.classList.add('border-bilfen-primary', 'bg-blue-50/70');
+        btn.classList.remove('border-slate-200', 'bg-white');
+        checkbox.classList.add('bg-bilfen-primary', 'border-bilfen-primary', 'text-white');
+        checkbox.classList.remove('border-slate-300', 'text-transparent');
+      }
+
+      // Buton üzerindeki seçim sayacını güncelle ve 3 seçimde vurgula
+      const count = state.selectedMultiChoices.size;
+      const multiBtnText = document.getElementById('btn-check-multi-text');
+      if (multiBtnText) {
+        if (count === 0) {
+          multiBtnText.textContent = 'Seçimleri Kontrol Et';
+          els.btnCheckMulti.classList.remove('ring-4', 'ring-amber-300');
+        } else if (count === 3) {
+          multiBtnText.textContent = '✓ 3 Seçim Yapıldı — Şimdi Kontrol Et!';
+          els.btnCheckMulti.classList.add('ring-4', 'ring-amber-300');
+        } else {
+          multiBtnText.textContent = `${count}/3 Seçildi — Seçimleri Kontrol Et`;
+          els.btnCheckMulti.classList.remove('ring-4', 'ring-amber-300');
+        }
+      }
+    }
+
+    function evaluateMultiChoices() {
+      if (state.isQuestAnswered) return;
+      const currentLevel = GAME_DATA[state.currentLevelIndex];
+      const quest = currentLevel.quests[state.currentQuestIndex];
+
+      // Hiçbir seçenek seçilmediyse
+      if (state.selectedMultiChoices.size === 0) {
+        sound.wrong();
+        showFeedback(false, "Önce malzemeleri veya sorunları seç.");
+        return;
+      }
+
+      // Tam doğru küme kontrolü
+      const userSelected = Array.from(state.selectedMultiChoices);
+      const correctSet = quest.correctSet;
+
+      const isExactMatch = (
+        userSelected.length === correctSet.length &&
+        userSelected.every(item => correctSet.includes(item))
+      );
+
+      if (isExactMatch) {
+        state.isQuestAnswered = true;
+        sound.correct();
+
+        // Puan ekle (+10)
+        if (!state.solvedQuests[quest.id]) {
+          state.score = Math.min(90, state.score + 10);
+          state.solvedQuests[quest.id] = true;
+        }
+
+        // Seçimleri yeşil onay simgesiyle kilitle
+        Array.from(els.optionsContainer.children).forEach(btn => {
+          btn.disabled = true;
+          const indicator = btn.querySelector('.checkbox-indicator');
+          if (correctSet.includes(btn.dataset.id)) {
+            btn.classList.remove('border-slate-200', 'border-bilfen-primary', 'bg-white', 'bg-blue-50/70');
+            btn.classList.add('border-emerald-500', 'bg-emerald-50', 'text-emerald-900');
+            if (indicator) {
+              indicator.className = 'checkbox-indicator w-6 h-6 rounded-lg border-2 border-emerald-500 flex items-center justify-center text-xs font-black bg-emerald-500 text-white';
+              indicator.textContent = '✓';
+            }
+          } else {
+            btn.classList.add('opacity-40');
+          }
+        });
+
+        els.btnCheckMulti.disabled = true;
+        els.btnCheckMulti.classList.remove('ring-4', 'ring-amber-300');
+        els.btnCheckMulti.classList.add('opacity-50', 'cursor-not-allowed');
+
+        // Level 3 Görev 3 için Devre Animasyonu (LED'i yak!)
+        if (quest.id === "L3_Q3") {
+          animateSolvedCircuit();
+        }
+
+        showFeedback(true, quest.feedback);
+        els.btnContinueQuest.classList.remove('hidden');
+        updateHUD();
+
+        // Geri bildirim ve Devam butonuna yumuşakça odaklan
+        setTimeout(() => {
+          els.btnContinueQuest.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 150);
+
+      } else {
+        // Eksik veya yanlış seçim kümesi tek seferde bir can götürür
+        sound.wrong();
+        state.hearts = Math.max(0, state.hearts - 1);
+        updateHUD();
+
+        showFeedback(false, quest.hint);
+
+        if (state.hearts <= 0) {
+          setTimeout(() => {
+            showScreen('gameOver');
+          }, 1100);
+        }
+      }
+    }
+
+    function animateSolvedCircuit() {
+      const gapMarker = document.getElementById('circuit-gap-marker');
+      const wire1 = document.getElementById('circuit-wire-1');
+      const ledGlow = document.getElementById('circuit-led-glow');
+      const ledTxt = document.getElementById('circuit-led-txt');
+      const statusText = document.getElementById('circuit-status-text');
+
+      if (gapMarker && gapMarker.parentNode) {
+        gapMarker.parentNode.removeChild(gapMarker);
+      }
+      if (wire1) {
+        wire1.setAttribute('d', 'M75 60 L180 60'); // Bağlantıyı kapat
+        wire1.setAttribute('stroke', '#10B981');   // Yeşil hat
+      }
+      if (ledGlow) {
+        ledGlow.setAttribute('fill', '#FEF08A');
+        ledGlow.setAttribute('stroke', '#F59E0B');
+        ledGlow.classList.add('animate-glow');
+      }
+      if (ledTxt) {
+        ledTxt.textContent = 'YANIK';
+        ledTxt.setAttribute('fill', '#B45309');
+      }
+      if (statusText) {
+        statusText.textContent = 'DEVREYİ KURTARDIN!';
+        statusText.setAttribute('fill', '#059669');
+        statusText.setAttribute('font-size', '13');
+        statusText.classList.add('animate-pulse');
+      }
+    }
+
+    function showFeedback(isSuccess, text) {
+      els.feedbackBox.classList.remove('hidden');
+      if (isSuccess) {
+        els.feedbackBox.className = 'mt-5 p-4 rounded-2xl border-2 border-emerald-300 bg-emerald-50 text-emerald-950 font-semibold flex items-start space-x-2.5';
+        els.feedbackBox.innerHTML = `
+          <span class="text-xl">🌟</span>
+          <div>${text}</div>
+        `;
+      } else {
+        els.feedbackBox.className = 'mt-5 p-4 rounded-2xl border-2 border-amber-300 bg-amber-50 text-amber-950 font-semibold flex items-start space-x-2.5';
+        els.feedbackBox.innerHTML = `
+          <span class="text-xl">💡</span>
+          <div><strong>İpucu:</strong> ${text}</div>
+        `;
+      }
+    }
+
+    function advanceQuest() {
+      sound.click();
+      const currentLevel = GAME_DATA[state.currentLevelIndex];
+
+      // Eğer leveldeki son soru tamamlandıysa
+      if (state.currentQuestIndex >= currentLevel.quests.length - 1) {
+        // Level bitti! Rozet ver
+        state.completedLevels[state.currentLevelIndex] = true;
+        state.earnedBadges[state.currentLevelIndex] = true;
+        sound.levelUp();
+
+        // Level Tamamlandı Ekranını hazırla
+        els.lvlSuccessTitle.textContent = currentLevel.badgeSuccessTitle;
+        els.lvlSuccessDesc.textContent = currentLevel.badgeSuccessDesc;
+        els.lvlSuccessScore.textContent = `${state.score} / 90`;
+        els.lvlSuccessHearts.textContent = '❤️'.repeat(state.hearts);
+
+        // Son level (Level 3) ise buton metnini "El Fenerini Kurtar!" yap
+        if (state.currentLevelIndex === 2) {
+          els.btnNextLevel.innerHTML = `
+            <span>El Fenerini Kurtar!</span>
+            <span>🔦</span>
+          `;
+        } else {
+          els.btnNextLevel.innerHTML = `
+            <span>Sonraki Level</span>
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+          `;
+        }
+
+        updateHUD();
+        showScreen('levelSuccess');
+
+      } else {
+        // Sonraki soruya geç
+        state.currentQuestIndex++;
+        loadCurrentQuest();
+      }
+    }
+
+    function proceedToNextLevelOrFinal() {
+      sound.click();
+      if (state.currentLevelIndex === 2) {
+        // 3. Level de bitti -> Final Ekranı
+        els.finalScoreText.textContent = `Toplam puanın: ${state.score} / 90`;
+        showScreen('final');
+      } else {
+        // Sonraki levele geç
+        state.currentLevelIndex++;
+        state.currentQuestIndex = 0;
+        // Yeni leveldeki puan geri alma referansını kaydet
+        state.levelStartScore = state.score;
+        // Canlar leveller arasında taşınır, yenilenmez.
+        loadCurrentQuest();
+        showScreen('quiz');
+      }
+    }
+
+    function retryCurrentLevel() {
+      sound.click();
+      // Mevcut leveli baştan, 3 canla başlatır
+      state.hearts = 3;
+      state.currentQuestIndex = 0;
+      
+      // Başarısız olunan bu levelde kazanılmış puanları geri al
+      state.score = state.levelStartScore;
+      
+      // Bu leveldeki soruların çözülme işaretlerini temizle
+      const currentLevelQuests = GAME_DATA[state.currentLevelIndex].quests;
+      currentLevelQuests.forEach(q => {
+        delete state.solvedQuests[q.id];
+      });
+
+      updateHUD();
+      loadCurrentQuest();
+      showScreen('quiz');
+    }
+
+    function resetAllProgress() {
+      sound.click();
+      state.currentLevelIndex = 0;
+      state.currentQuestIndex = 0;
+      state.score = 0;
+      state.hearts = 3;
+      state.completedLevels = [false, false, false];
+      state.earnedBadges = [false, false, false];
+      state.solvedQuests = {};
+      state.selectedMultiChoices.clear();
+      state.isQuestAnswered = false;
+      state.hasGameStarted = false;
+      state.levelStartScore = 0;
+
+      updateHUD();
+      showScreen('home');
+    }
+
+    function startGameOrResume() {
+      sound.click();
+      state.hasGameStarted = true;
+      updateHUD();
+      loadCurrentQuest();
+      showScreen('quiz');
+    }
+
+    function setupEventListeners() {
+      // Ana Sayfa Düğmeleri
+      els.btnStartGame.addEventListener('click', startGameOrResume);
+      els.btnResetGameHome.addEventListener('click', resetAllProgress);
+
+      // Quiz Düğmeleri
+      els.btnCheckMulti.addEventListener('click', evaluateMultiChoices);
+      els.btnContinueQuest.addEventListener('click', advanceQuest);
+      els.btnReturnHome.addEventListener('click', () => {
+        sound.click();
+        showScreen('home');
+      });
+
+      // Level Başarı Düğmeleri
+      els.btnNextLevel.addEventListener('click', proceedToNextLevelOrFinal);
+      els.btnLvlSuccessHome.addEventListener('click', () => {
+        sound.click();
+        showScreen('home');
+      });
+
+      // Can Bitti (Game Over) Düğmeleri
+      els.btnRetryLevel.addEventListener('click', retryCurrentLevel);
+      els.btnGameOverHome.addEventListener('click', () => {
+        sound.click();
+        showScreen('home');
+      });
+
+      // Final Ekranı Düğmeleri
+      els.btnGoDesignTime.addEventListener('click', () => {
+        sound.click();
+        showScreen('activity');
+      });
+      els.btnReplayAll.addEventListener('click', resetAllProgress);
+
+      // Sınıf Etkinliği Ekranı Düğmeleri
+      els.btnActivityReplay.addEventListener('click', resetAllProgress);
+      els.btnActivityHome.addEventListener('click', () => {
+        sound.click();
+        showScreen('home');
+      });
+
+      // Klavye Erişilebilirliği (1, 2, 3 veya A, B, C tuşları ve Enter/Space)
+      window.addEventListener('keydown', (e) => {
+        // Eğer soru ekranında isek ve soru tekli seçim ise
+        if (!els.screenQuiz.classList.contains('hidden')) {
+          const currentLevel = GAME_DATA[state.currentLevelIndex];
+          const quest = currentLevel.quests[state.currentQuestIndex];
+
+          if (quest.type === 'single' && !state.isQuestAnswered) {
+            const key = e.key.toUpperCase();
+            let optionKey = null;
+            if (key === '1' || key === 'A') optionKey = 'A';
+            if (key === '2' || key === 'B') optionKey = 'B';
+            if (key === '3' || key === 'C') optionKey = 'C';
+
+            if (optionKey) {
+              const targetBtn = Array.from(els.optionsContainer.children).find(b => b.dataset.key === optionKey);
+              if (targetBtn) {
+                handleSingleSelect(optionKey, targetBtn, quest);
+              }
+            }
+          }
+
+          // Enter tuşu ile "Devam" veya "Kontrol Et"
+          if (e.key === 'Enter') {
+            if (!els.btnContinueQuest.classList.contains('hidden')) {
+              advanceQuest();
+            } else if (!els.multiCheckContainer.classList.contains('hidden') && quest.type === 'multi') {
+              evaluateMultiChoices();
+            }
+          }
+        }
+      });
+    }
+
+    // Uygulamayı Başlat
+    window.addEventListener('DOMContentLoaded', () => {
+      setupEventListeners();
+      updateHUD();
+      showScreen('home');
+    });
+  </script>
+</body>
+</html>
